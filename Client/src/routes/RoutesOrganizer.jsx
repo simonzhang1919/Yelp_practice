@@ -1,7 +1,7 @@
 import * as ReactDOM from "react-dom/client";
 import { Routes, Route } from "react-router-dom";
 import Home from "./Home";
-import Restaurantsdetailpage from "./RestaurantsDetailPage";
+import RestaurantsDetailPage from "./RestaurantsDetailPage";
 import Update from "./Update";
 import AddNewRestaurant from "./AddNewRestaurant";
 import SignUp from "./SignUp";
@@ -17,7 +17,7 @@ const RoutesOrganizer = () => {
         <Route
           exact
           path="/restaurants/:id/"
-          element={<Restaurantsdetailpage />}
+          element={<RestaurantsDetailPage />}
         />
         {/* <Route exact path="/restaurants/:id/update" element={<Update />} /> */}
         <Route exact path="/login" element={<Login/>} />
