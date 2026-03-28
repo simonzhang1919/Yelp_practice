@@ -1,6 +1,5 @@
 import axios from "axios";
-import {useNavigate} from 'react-router-dom'
-
+import { useNavigate } from "react-router-dom";
 
 /** API Class.
  *
@@ -11,7 +10,7 @@ import {useNavigate} from 'react-router-dom'
  */
 
 class yelpAPI {
-  static BASE_URL = import.meta.env.VITE_BASEURL || "http://localhost:3001";
+  static BASE_URL = import.meta.env.VITE_BASEURL || "http://localhost:3000";
 
   static token;
 
@@ -20,14 +19,14 @@ class yelpAPI {
     str
       .toLowerCase()
       .replace(/([-_][a-z])/g, (group) =>
-        group.toUpperCase().replace("-", "").replace("_", "")
+        group.toUpperCase().replace("-", "").replace("_", ""),
       );
 
   static async request(endpoint = "", data = {}, method = "get") {
     console.debug("API Call:", endpoint, data, method);
 
     //base api call
-    const headers = { "Access-Control-Allow-Origin": "http://localhost:3000" };
+    // const headers = { "Access-Control-Allow-Origin": "http://localhost:3000" };
     const withCredentials = { withCredentials: true };
     const credentials = { credentials: "include" };
     const url = `${this.BASE_URL}/${endpoint}`;
@@ -40,7 +39,7 @@ class yelpAPI {
           method,
           data,
           params,
-          headers,
+
           withCredentials: true,
           credentials: "include",
         })
@@ -49,7 +48,7 @@ class yelpAPI {
       console.error("API Error:", err.response);
       let message = err.response.data.error.message;
       throw Array.isArray(message) ? message : [message];
-      navigate("/") 
+      navigate("/");
     }
   }
 
@@ -61,9 +60,8 @@ class yelpAPI {
 
   /** Searches exact restaurant by id */
   static async getRestaurantByID(id) {
-  
     let res = await this.request(`api/v1/restaurant/${id}`);
-   
+
     return res;
   }
 
@@ -111,40 +109,38 @@ class yelpAPI {
   }
 
   // so turns out this is a survey on yelp no one votes on this repurpose to rating
-  static async priceVoting(data){
+  static async priceVoting(data) {
     let res = await this.request("api/v1/favorite", data, "post");
 
     return res;
   }
 
-  static async rating(data){
+  static async rating(data) {
     let res = await this.request("api/v1/restaurantrating", data, "post");
 
     return res;
   }
 
-
-  static async commentingOrReplying(data){
+  static async commentingOrReplying(data) {
     let res = await this.request("api/v1/commentorreply", data, "post");
- 
+
     return res;
   }
 
-
-  static async seeReplies(data){
+  static async seeReplies(data) {
     let res = await this.request("api/v1/seereplies", data, "post");
     return res.result;
   }
 
-  static async editComment(data){
+  static async editComment(data) {
     let res = await this.request("api/v1/editcomment", data, "post");
     return res;
   }
-  
-  static async getId(){
+
+  static async getId() {
     let res = await this.request("api/v1/getuserid");
 
-    return res
+    return res;
   }
 
   //DEPRECATED

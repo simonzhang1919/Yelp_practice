@@ -16,6 +16,7 @@ CREATE TABLE
     id integer  primary key generated always as identity,
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(60) NOT NULL,
+    middle_name VARCHAR(60),
     email  VARCHAR(254) UNIQUE NOT NULL,
     passhash VARCHAR(254) NOT NULL,
     created_at timestamp with time zone NOT NULL DEFAULT date_trunc('second', now()::timestamp), 
@@ -25,9 +26,9 @@ CREATE TABLE
 
 
 CREATE TABLE user_sessions(
-  sid TEXT NOT NULL, 
+  sid TEXT PRIMARY KEY, 
   sess json NOT NULL, 
-  expire timestamp without time zone NOT NULL;
+  expire timestamp without time zone NOT NULL
 );
 
   CREATE TABLE 
@@ -44,11 +45,7 @@ CREATE TABLE user_sessions(
 
 
 
-TRANSACTIONAL EXAMPLE
-  BEGIN
-  
-  
-  COMMIT
+
 
 
 -- change this table to just restaurant and price float
@@ -148,4 +145,4 @@ insert into yelp_users (first_name, last_name, middle_name, email, passhash) val
 
 insert into user_favorites (user_id, restaurants_id) values (1,2);
 
-insert into user_favorites (first_name, last_name, middle_name, email, passhash) values ('Giorgia', 'Bellenie', 'Allix', 'iaculis diam erat fermentum justo nec condimentum neque sapien placerat ante nulla justo', 'convallis nulla neque libero convallis eget eleifend luctus ultricies eu');
+-- insert into user_favorites (first_name, last_name, middle_name, email, passhash) values ('Giorgia', 'Bellenie', 'Allix', 'iaculis diam erat fermentum justo nec condimentum neque sapien placerat ante nulla justo', 'convallis nulla neque libero convallis eget eleifend luctus ultricies eu');

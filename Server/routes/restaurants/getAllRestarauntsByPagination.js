@@ -1,6 +1,6 @@
 const db = require("../../DB");
 
-const getAllRestarauntsByPagination = async (req, res) => {
+const getAllRestarauntsByPagination = async (req, res, next) => {
   const limit = req.body["limit"] || 10;
   const cursor = req.body["cursor"];
   const realLimit = Math.min(30, limit);
@@ -23,7 +23,7 @@ const getAllRestarauntsByPagination = async (req, res) => {
       GROUP BY id
     ORDER BY ID LIMIT $1
     `,
-      queries
+      queries,
     );
 
     // const ratingMetaData = await db.query(

@@ -17,7 +17,7 @@ const sessionConfig = require("./configs/sessionConfig");
 //middlewear
 const isAuth = require("./middlewear/isAuth");
 const isRestaurant = require("./middlewear/isRestaurant");
-const errorHandler = require("./middlewear/errorHandler")
+const errorHandler = require("./middlewear/errorHandler");
 
 //schemas
 const validateSchema = require("./middlewear/validateSchema");
@@ -27,7 +27,7 @@ const createRestaurantSchema = require("./schema/createRestaurantSchema");
 const signUpUserSchema = require("./schema/signUpUserSchema");
 const loginUserSchema = require("./schema/loginUserSchema");
 const commentOrReplySchema = require("./schema/commentOrReplySchema");
-const seeRepliesSchema = require("./schema/seeRepliesSchema")
+const seeRepliesSchema = require("./schema/seeRepliesSchema");
 
 //Routes
 const getAllRestarauntsOrByName = require("./routes/restaurants/getAllRestarauntsOrByName");
@@ -45,10 +45,9 @@ const seeReplies = require("./routes/comments/seeReplies");
 const editComment = require("./routes/comments/editComment");
 const getNewRestaraunts = require("./routes/restaurants/getNewRestaraunts");
 
-
-
 /**secrets */
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
+
 const SESSIONSECRET = process.env.SESSION_SECRET;
 const GENSALT = process.env.GENSALT;
 // const JWTSECRET = process.env.JWT_SECRET;
@@ -56,7 +55,23 @@ const GENSALT = process.env.GENSALT;
 /** MIDDLEWARE */
 app.set("trust proxy", 1);
 
-app.use(cors(corsConfig));
+// app.use(cors(corsConfig));
+// app.options("*", cors(corsConfig));
+app.options(
+  "*",
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+  }),
+);
 app.use(morgan("dev"));
 app.use(express.json());
 
@@ -80,7 +95,6 @@ app.use(passport.session());
 // userAuth
 app.use("/api/v1/logout", isAuth);
 
-
 // app.use("/api/v1/restaurants", isAuth);
 
 // TODO safer methods and middlewears look at react and previus projects
@@ -93,7 +107,7 @@ app.get(
   "/api/v1/restaurants",
   getRestaurantNameSchema,
   validateSchema,
-  getAllRestarauntsOrByName
+  getAllRestarauntsOrByName,
 );
 
 // get a restaraunt by id
@@ -102,21 +116,18 @@ app.get(
   getRestaurantIdSchema,
   validateSchema,
   isRestaurant,
-  getRestaurantById
+  getRestaurantById,
 );
 
 //get new restaurants
-app.post(
-  "/api/v1/newrestaurant",
-  getAllRestarauntsByPagination
-);
+app.post("/api/v1/newrestaurant", getAllRestarauntsByPagination);
 
 //create a reastaruant
 app.post(
   "/api/v1/create_restaurant/",
   // createRestaurantSchema,
   // validateSchema,
-  createRestaurant
+  createRestaurant,
 );
 
 //update restaraunt
@@ -137,8 +148,9 @@ app.get("/api/v1/fetchuser/", fetchUser);
 app.post(
   "/api/v1/signup",
   signUpUserSchema,
+
   validateSchema,
-  signup
+  signup,
 );
 
 /**
@@ -155,9 +167,12 @@ app.post(
     return res.json({ user: req.user, status: "login", token: req.sessionID });
   },
   (err, req, res, next) => {
-    const output = JSON.parse(err);
-    return res.json(output);
-  }
+    console.error(err);
+
+    res.status(500).json({
+      error: err.message || "Internal Server Error",
+    });
+  },
 );
 
 app.delete("/api/v1/logout", logout);
@@ -191,11 +206,11 @@ app.post(
 
     const result = await db.query(
       `INSERT INTO price_range (user_id, restaurants_id ,price) VALUES($1,$2, $3) returning *`,
-      [userId, restaurantId, voteValue]
+      [userId, restaurantId, voteValue],
     );
 
     return res.json({ msg: "voted" });
-  }
+  },
 );
 
 app.post("/api/v1/restaurantrating", isAuth, isRestaurant, restaurantRating);
@@ -206,7 +221,7 @@ app.post(
   isRestaurant,
   commentOrReplySchema,
   validateSchema,
-  commentOrReply
+  commentOrReply,
 );
 
 app.post(
@@ -214,66 +229,63 @@ app.post(
   isRestaurant,
   seeRepliesSchema,
   validateSchema,
-  seeReplies
+  seeReplies,
 );
 
-app.post("/api/v1/editcomment", isAuth,editComment )
+app.post("/api/v1/editcomment", isAuth, editComment);
 
-app.get("/api/v1/getuserid",
-  async (req,res)=>{
+app.get("/api/v1/getuserid", async (req, res) => {
+  // const usersId = await db.query(`
+  //   select ARRAY(select id from yelp_users)
+  // `).then( rows => rows["rows"][0]["array"])
 
-    // const usersId = await db.query(`
-    //   select ARRAY(select id from yelp_users)
-    // `).then( rows => rows["rows"][0]["array"])
-
-    const restId = await db.query(`
+  const restId = await db
+    .query(
+      `
     select ARRAY(select id from restaurants)
-  `).then( rows => rows["rows"][0]["array"])
+  `,
+    )
+    .then((rows) => rows["rows"][0]["array"]);
 
-  let count=0
-  for(let i=0; i< restId.length;i++){
-    const chance = Math.random()*100
-    if (chance >90 || i%( (7*i)%10)>6){
-      count++
-      continue
+  let count = 0;
+  for (let i = 0; i < restId.length; i++) {
+    const chance = Math.random() * 100;
+    if (chance > 90 || i % ((7 * i) % 10) > 6) {
+      count++;
+      continue;
     }
-    const alpha =  Math.random()*100
-    let price
-    if (alpha < 10){
-      price =1
+    const alpha = Math.random() * 100;
+    let price;
+    if (alpha < 10) {
+      price = 1;
+    } else if (alpha >= 10 && alpha < 25) {
+      price = 2;
+    } else if (alpha >= 25 && alpha < 55) {
+      price = 3;
+    } else if (alpha >= 55 && alpha < 80) {
+      price = 4;
+    } else if (alpha >= 80) {
+      price = 5;
     }
-    else if(alpha >=10 && alpha <25){
-      price = 2
-    }
-    else if(alpha >=25 && alpha <55){
-      price = 3
-    }
-    else if(alpha >=55 && alpha <80){
-      price = 4
-    } else if(alpha >=80){
-      price = 5
-    }
-        
-    try{
-        await db.query(`
+
+    try {
+      await db.query(
+        `
         insert into price_range (restaurants_id, price)
         values ($1, $2)
-        `,[restId[i], price])
-    }catch(err){
-      console.log(err)
-      continue
+        `,
+        [restId[i], price],
+      );
+    } catch (err) {
+      console.log(err);
+      continue;
     }
-      
-    
   }
 
-    return res.json({restId})
-  }
-)
+  return res.json({ restId });
+});
 
-
-
-app.use(errorHandler)
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`server is up and listening on port ${PORT}`);
